@@ -17,8 +17,8 @@ export default function Comments({ comment, postUserId, callback }) {
         try {
             const response = await updateCommentApi(comment._id, updatedValue);
             if (response?.message === 'success') {
-                setIsUpdating(false);       
-                if (typeof callback === 'function') await callback(); 
+                setIsUpdating(false);
+                if (typeof callback === 'function') await callback();
             }
         } catch (err) {
             console.error("Update comment error:", err);

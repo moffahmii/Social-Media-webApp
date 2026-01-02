@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Spinner } from '@heroui/react';
+import {
+    Dropdown,
+    DropdownTrigger,
+    DropdownMenu,
+    DropdownItem,
+    Spinner,
+    Button
+} from '@heroui/react';
+import { MoreHorizontal, Trash2, Edit3 } from 'lucide-react';
 
 export default function DropDownActions({
     id,
@@ -12,6 +20,7 @@ export default function DropDownActions({
     const [loading, setLoading] = useState(false);
 
     async function handleDelete() {
+
         setLoading(true);
         try {
             await deleteAction(id);
@@ -20,7 +29,7 @@ export default function DropDownActions({
                 if (typeof callback === 'function') await callback();
             } else {
                 if (typeof onDelete === 'function') {
-                    onDelete(id); 
+                    onDelete(id);
                 }
             }
         } catch (err) {
@@ -30,32 +39,47 @@ export default function DropDownActions({
         }
     }
 
-
     return (
-        <Dropdown>
+        <Dropdown placement="bottom-end" className="min-w-30]">
             <DropdownTrigger>
-                <button className="p-2 hover:bg-gray-100 rounded-full" disabled={loading}>
-                    {loading ? <Spinner size="sm" /> : (
-                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round"
-                                d="M6.75 12a.75.75 0 1 1-1.5 0
-                                   .75.75 0 0 1 1.5 0ZM12.75 12
-                                   a.75.75 0 1 1-1.5 0
-                                   .75.75 0 0 1 1.5 0ZM18.75 12
-                                   a.75.75 0 1 1-1.5 0
-                                   .75.75 0 0 1 1.5 0Z" />
-                        </svg>
+                <Button
+                    isIconOnly
+                    size="sm"
+                    variant="light"
+                    radius="full"
+                    disabled={loading}
+                    className="text-slate-400 hover:text-slate-600"
+                >
+                    {loading ? (
+                        <Spinner size="sm" color="current" />
+                    ) : (
+                        <MoreHorizontal size={20} />
                     )}
-                </button>
+                </Button>
             </DropdownTrigger>
 
-            <DropdownMenu>
-                {isComment && setIsUpdating && (
-                    <DropdownItem onClick={() => setIsUpdating(true)}>
+            <DropdownMenu
+                aria-label="Actions"
+                variant="flat"
+                disabledKeys={loading ? ["edit", "delete"] : []}
+            >
+                {setIsUpdating && (
+                    <DropdownItem
+                        key="edit"
+                        startContent={<Edit3 size={16} />}
+                        onClick={() => setIsUpdating(true)}
+                    >
                         Edit
                     </DropdownItem>
                 )}
-                <DropdownItem onClick={handleDelete} color="danger" className="text-danger">
+
+                <DropdownItem
+                    key="delete"
+                    color="danger"
+                    className="text-danger"
+                    startContent={<Trash2 size={16} />}
+                    onClick={handleDelete}
+                >
                     Delete
                 </DropdownItem>
             </DropdownMenu>

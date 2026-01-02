@@ -1,7 +1,6 @@
 import axios from "axios";
 
 export async function getAllPosts() {
-
     try {
         const { data } = await axios.get('https://linked-posts.routemisr.com/posts', {
             headers: {
@@ -43,8 +42,8 @@ export async function createPostApi(formData) {
         console.log(err)
     }
 }
-export async function getPostCommentsApi(postId) {
 
+export async function getPostCommentsApi(postId) {
     try {
         const { data } = await axios.get('https://linked-posts.routemisr.com/posts/' + postId + '/comments', {
             headers: {
@@ -56,5 +55,4 @@ export async function getPostCommentsApi(postId) {
     catch (err) {
         console.log(err)
     }
-
 }

@@ -1,88 +1,125 @@
-import { Button, Input, Spinner } from '@heroui/react'
-import staticImage from '../assets/Portrait_Placeholder.png'
-import React, { useState } from 'react'
+import { Button, Card, CardBody, Textarea, Spinner, Avatar, Divider } from '@heroui/react'
+import React, { useState, useContext } from 'react'
 import { createPostApi } from '../Services/PostServices'
-import { div } from 'framer-motion/client'
+import { AuthContext } from '../Context/AuthContext'
+import { Image as ImageIcon, X, Send } from 'lucide-react'
 
 export default function CreatePost({ callback }) {
-
     const [postBody, setPostBody] = useState('')
     const [image, setImage] = useState(null)
-    const [imageUrl, setImageUrl] = useState()
+    const [imageUrl, setImageUrl] = useState('')
     const [loading, setLoading] = useState(false)
+    const { userData } = useContext(AuthContext);
 
     function handleImage(e) {
-        setImage(e.target.files[0])
-        setImageUrl(URL.createObjectURL(e.target.files[0]))
+        if (e.target.files[0]) {
+            setImage(e.target.files[0])
+            setImageUrl(URL.createObjectURL(e.target.files[0]))
+        }
     }
 
-    async function CreatePost(e) {
+    function removeImage() {
+        setImage(null)
+        setImageUrl('')
+    }
+
+    async function handleCreatePost(e) {
         e.preventDefault();
+        if (!postBody.trim() && !image) return;
+
         setLoading(true)
         const formData = new FormData()
-        if (postBody) {
-            formData.append('body', postBody)
+        if (postBody) formData.append('body', postBody)
+        if (image) formData.append('image', image)
+
+        try {
+            const res = await createPostApi(formData)
+            if (res.message === 'success') {
+                await callback()
+                setPostBody('')
+                removeImage()
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false)
         }
-        if (image) {
-            formData.append('image', image)
-        }
-        const res = await createPostApi(formData)
-        if (res.message) {
-            await callback()
-            setPostBody('')
-            setImage(null)
-            setImageUrl('')
-        }
-        setLoading(false)
     }
-    
-    return <>
-        <div className='bg-white w-full relative rounded-md h-auto shadow-md p-3 my-5'>
-            <form onSubmit={CreatePost}>
-                <textarea name="" value={postBody} onChange={(e) => setPostBody(e.target.value)} id="" placeholder='What is in your mind?'
-                    className='w-full p-4 border rounde-md bg-gray-100 resize-none' rows={4}></textarea>
-                {imageUrl && <div className='relative'>
-                    <img src={imageUrl} className='w-full' alt="" />
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        onClick={() => setImageUrl('')}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-6 absolute right-4 cursor-pointer top-4"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18 18 6M6 6l12 12"
+
+    return (
+        <Card className="max-w-xxl w-[95%] sm:w-full mx-auto my-6 shadow-sm border border-slate-100 rounded-2xl overflow-hidden relative">
+            <CardBody className="p-4">
+                <form onSubmit={handleCreatePost} className="flex flex-col gap-4">
+                    <div className="flex gap-3">
+                        <Avatar
+                            src={userData?.photo}
+                            size="sm"
+                            isBordered
+                            color="primary"
+                            className="shrink-0"
                         />
-                    </svg>
-                </div>}
-                <div className='flex justify-between items-center'>
-                    <label className='cursor-pointer hover:text-blue-400 flex items-center gap-2'>
-                        <Input type='file' onChange={handleImage} className='border hidden' />
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="size-6">
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Z"
-                            />
-                        </svg>
-                    </label>
-                    <Button type='submit' color='primary'>Post</Button>
+                        <Textarea
+                            variant="flat"
+                            placeholder="What's on your mind?"
+                            value={postBody}
+                            onChange={(e) => setPostBody(e.target.value)}
+                            className="w-full"
+                            minRows={3}
+                            cacheMeasurements
+                            classNames={{
+                                input: "text-base",
+                                inputWrapper: "bg-slate-50 hover:bg-slate-100 focus-within:bg-white transition-all",
+                            }}
+                        />
+                    </div>
+
+                    {imageUrl && (
+                        <div className="relative rounded-xl overflow-hidden border border-slate-200">
+                            <img src={imageUrl} className="w-full h-auto object-cover max-h-60" alt="Preview" />
+                            <Button
+                                isIconOnly
+                                size="sm"
+                                color="danger"
+                                variant="solid"
+                                className="absolute top-2 right-2 rounded-full shadow-lg z-10"
+                                onClick={removeImage}
+                            >
+                                <X size={16} />
+                            </Button>
+                        </div>
+                    )}
+                    <Divider className="opacity-50" />
+                    <div className="flex justify-between items-center">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                            <div className="p-2 rounded-full group-hover:bg-blue-50 transition-colors">
+                                <ImageIcon size={22} className="text-blue-500" />
+                            </div>
+                            <span className="text-xs font-semibold text-slate-500 group-hover:text-blue-500 transition-colors">
+                                Photo
+                            </span>
+                            <input type="file" onChange={handleImage} className="hidden" accept="image/*" />
+                        </label>
+
+                        <Button
+                            type="submit"
+                            color="primary"
+                            size="sm"
+                            className="font-bold px-6 rounded-lg shadow-md"
+                            isLoading={loading}
+                            endContent={!loading && <Send size={16} />}
+                            disabled={!postBody.trim() && !image}
+                        >
+                            Post
+                        </Button>
+                    </div>
+                </form>
+            </CardBody>
+
+            {loading && (
+                <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-50 flex justify-center items-center">
+                    <Spinner color="primary" label="Posting..." size="lg" />
                 </div>
-
-            </form>
-            {loading && <div className='absolute flex justify-center items-center inset-0 bg-gray-300 opacity-50'>
-                <Spinner />
-            </div>}
-        </div>
-
-    </>
+            )}
+        </Card>
+    )
 }

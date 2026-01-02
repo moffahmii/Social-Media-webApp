@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getUserDataApi } from '../Services/AuthServices';
-import LoadingScreen from '../Components/LoadingScreen';
-import UserPosts from '../Components/UserPosts';
 import { uploadUserPhotoApi } from '../Services/UserServices';
-import { Link } from 'react-router-dom'; // مهم جداً للـ Link
+import { Link } from 'react-router-dom';
+import { Card, CardBody, Avatar, Button, Chip, Skeleton, Tooltip, Divider } from '@heroui/react';
+import { Camera, Lock, Mail, Calendar, User as UserIcon } from 'lucide-react';
+import UserPosts from '../Components/UserPosts';
 
 export default function Profile() {
   const [userData, setUserData] = useState(null);
@@ -24,7 +25,6 @@ export default function Profile() {
 
     try {
       const response = await uploadUserPhotoApi(file);
-
       if (response?.message === "success" && response.user) {
         setUserData(prev => ({ ...prev, photo: response.user.photo }));
       } else {
@@ -32,8 +32,7 @@ export default function Profile() {
       }
     } catch (err) {
       setUserData(prev => ({ ...prev, photo: oldPhoto }));
-      setUploadError("Failed to upload photo. Please try again.");
-      console.error("Upload error:", err);
+      setUploadError("Failed to upload photo.");
     } finally {
       setIsUploading(false);
       URL.revokeObjectURL(previewUrl);
@@ -48,7 +47,7 @@ export default function Profile() {
         setUserData(response.user);
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -58,69 +57,93 @@ export default function Profile() {
     getUserData();
   }, []);
 
-  if (isLoading || !userData) {
-    return <div className="w-4/6 mx-auto mt-10"><LoadingScreen /></div>;
+  if (isLoading) {
+    return (
+      <div className="max-w-xl mx-auto mt-10 p-4"> {/* تم التعديل لـ max-w-xl */}
+        <Card className="p-8 shadow-sm rounded-2xl">
+          <div className="flex flex-col items-center gap-6">
+            <Skeleton className="w-32 h-32 md:w-40 md:h-40 rounded-full shrink-0" />
+            <div className="flex flex-col gap-3 w-full items-center">
+              <Skeleton className="h-8 w-2/3 rounded-lg" />
+              <Skeleton className="h-5 w-1/2 rounded-lg" />
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <div className="container py-10">
-      <div className='w-[95%] md:w-5/6 lg:w-4/6 mx-auto bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 mt-6'>
-        <div className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-
-          <div className="relative group">
-            <img
-              src={userData.photo || "/default-avatar.png"}
-              alt={userData.name}
-              className={`w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-blue-500 shadow-sm transition-opacity ${isUploading ? 'opacity-50' : 'opacity-100'}`}
-            />
-
-            <label className="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center cursor-pointer shadow-md hover:bg-blue-700 transition-colors">
-              <input type="file" accept="image/*" className="hidden" onChange={handleUploadPhoto} disabled={isUploading} />
-              <span className="text-sm">✎</span>
-            </label>
-
-            {isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/20">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1">
-            <h1 className='text-2xl md:text-3xl font-bold text-gray-800'>{userData.name}</h1>
-            <p className='text-gray-500'>{userData.email}</p>
-
-            {/* Badges + Change Password Link */}
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Badge text={userData.gender} color="blue" />
-              <Badge text={userData.dateOfBirth} color="gray" />
-
-              <Link
-                to="/change-password"
-                className="px-3 py-1 bg-blue-600 text-white text-xs md:text-sm rounded hover:bg-blue-700 transition-colors"
-              >
-                Change Password
-              </Link>
+    <div className="w-4/6 mx-auto py-10 px-4">
+      <Card className="w-full bg-white/80 backdrop-blur-md shadow-sm border border-slate-100 rounded-2xl overflow-hidden">
+        <CardBody className="p-8">
+          <div className="flex flex-col items-center gap-6 text-center">
+            <div className="relative group shrink-0">
+              <Avatar
+                src={userData.photo}
+                className="w-32 h-32 md:w-40 md:h-40 border-4 border-white shadow-xl"
+                isBordered
+                color={isUploading ? "primary" : "default"}
+              />
+              <Tooltip content="Update Photo" placement="bottom">
+                <label className="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform z-20">
+                  <input type="file" accept="image/*" className="hidden" onChange={handleUploadPhoto} disabled={isUploading} />
+                  <Camera size={20} />
+                </label>
+              </Tooltip>
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-white/40 backdrop-blur-[1px] z-10">
+                  <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </div>
-
-            {uploadError && <p className="mt-2 text-red-500 text-sm animate-pulse">{uploadError}</p>}
+            <div className="space-y-4 w-full flex flex-col items-center">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-800 flex items-center justify-center gap-2">
+                  {userData.name}
+                  <Chip size="sm" variant="flat" color="primary">User</Chip>
+                </h1>
+                <p className="text-slate-500 flex items-center justify-center gap-2 mt-1 font-medium">
+                  <Mail size={16} /> {userData.email}
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-3">
+                <Chip variant="flat" size="md" color="default" className="bg-slate-100 font-bold text-slate-600 border-none px-4 py-1">
+                  {userData.gender || "Gender"}
+                </Chip>
+                <Chip variant="flat" size="md" color="default" className="bg-slate-100 text-slate-600 border-none px-4 py-1">
+                  {userData.dateOfBirth || "Birth Date"}
+                </Chip>
+              </div>
+              <div className="pt-2 w-full flex justify-center">
+                <Button
+                  as={Link}
+                  to="/change-password"
+                  variant="flat"
+                  color="primary"
+                  radius="full"
+                  size="md"
+                  startContent={<Lock size={18} />}
+                  className="font-bold w-full max-w-64 shadow-sm"
+                >
+                  Change Password
+                </Button>
+              </div>
+              {uploadError && (
+                <p className="text-danger text-xs font-bold animate-pulse mt-2">{uploadError}</p>
+              )}
+            </div>
           </div>
+        </CardBody>
+      </Card>
+      <div className="mt-12 w-full">
+        <div className="flex items-center gap-3 mb-8">
+          <Divider className="flex-1 opacity-50" />
+          <h2 className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px] shrink-0">Your Feed</h2>
+          <Divider className="flex-1 opacity-50" />
         </div>
+        <UserPosts userId={userData._id} />
       </div>
-
-      <UserPosts userId={userData._id} />
     </div>
-  )
-}
-
-function Badge({ text, color }) {
-  const styles = {
-    blue: "bg-blue-50 text-blue-600 border-blue-100",
-    gray: "bg-gray-50 text-gray-600 border-gray-100"
-  };
-  return (
-    <span className={`px-3 py-1 text-xs md:text-sm rounded-full font-medium border ${styles[color]}`}>
-      {text || "N/A"}
-    </span>
   );
 }

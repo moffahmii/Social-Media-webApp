@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { getUserPostsApi } from '../Services/UserServices';
 import PostCard from './PostCard';
+import LoadingScreen from './LoadingScreen';
+import { Card } from '@heroui/react';
 
 export default function UserPosts({ userId }) {
     const [userPosts, setUserPosts] = useState([]);
@@ -14,7 +16,7 @@ export default function UserPosts({ userId }) {
                 setUserPosts(response.posts);
             }
         } catch (err) {
-            console.log(err);
+            console.error("Error fetching user posts:", err);
         } finally {
             setLoading(false);
         }
@@ -24,16 +26,33 @@ export default function UserPosts({ userId }) {
         if (userId) getUserposts();
     }, [userId]);
 
-    if (loading) return <p className="text-center mt-4">Loading posts...</p>;
+    if (loading) {
+        return (
+            <div className="w-full flex flex-col gap-2">
+                <LoadingScreen />
+                <LoadingScreen />
+                <LoadingScreen />
+            </div>
+        );
+    }
 
-    if (!userPosts.length) return <p className="text-center mt-4">No posts yet.</p>;
+    if (!userPosts.length) {
+        return (
+            <Card className="max-w-md mx-auto p-10 text-center bg-white/50 border-2 border-dashed border-slate-200 shadow-none mt-6">
+                <p className="text-slate-400 font-bold">No posts created yet.</p>
+            </Card>
+        );
+    }
 
     return (
-        <div className="w-[95%] md:w-5/6 lg:w-4/6 mx-auto mt-6 flex flex-col gap-6">
+        <div className="max-w-xxl flex flex-col gap-2 mt-2">
             {userPosts.map(post => (
-                <div key={post._id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                    <PostCard post={post} />
-                </div>
+                <PostCard
+                    key={post._id}
+                    post={post}
+                    onDelete={getUserposts
+                    } 
+                />
             ))}
         </div>
     );
