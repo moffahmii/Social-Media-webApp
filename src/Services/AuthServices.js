@@ -17,7 +17,6 @@ export async function signIn(userData) {
         return err.response?.data || { message: 'error', error: 'Something went wrong' };
     }
 }
-
 export async function getUserDataApi() {
     try {
         const { data } = await axios.get('https://linked-posts.routemisr.com/users/profile-data',
@@ -28,10 +27,22 @@ export async function getUserDataApi() {
             }
         )
         return data;
-
     }
     catch (err) {
         console.log(err)
     }
 
+}
+
+export async function changePassword(data) {
+    try {
+        const res = await axios.patch(
+            "https://linked-posts.routemisr.com/users/change-password",
+            { password: data.password, newPassword: data.newPassword },
+            { headers: { token: localStorage.getItem("token") } }
+        );
+        return res.data;
+    } catch (err) {
+        return err.response?.data;
+    }
 }

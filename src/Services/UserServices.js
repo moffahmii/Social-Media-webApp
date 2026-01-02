@@ -1,7 +1,6 @@
 import axios from "axios"
 
 export async function getUserDataApi() {
-
     try {
         const { data } = await axios.get('https://linked-posts.routemisr.com/users/profile-data', {
             headers: {
@@ -14,6 +13,7 @@ export async function getUserDataApi() {
         console.log(err)
     }
 }
+
 export async function getUserPostsApi(userId) {
     try {
         const { data } = await axios.get(`https://linked-posts.routemisr.com/users/${userId}/posts`, {

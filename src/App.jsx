@@ -11,6 +11,7 @@ import Login from './Pages/Login'
 import Regiester from './Pages/Regiester'
 import ProtectedRoute from './Components/ProtectedRoute'
 import AuthProtectedRoute from './Components/AuthProtectedRoute'
+import UpdatePassword from './Pages/UpdatePassword'
 
 const routers = createBrowserRouter([
   {
@@ -18,6 +19,7 @@ const routers = createBrowserRouter([
       { index: true, element: <ProtectedRoute><FeedPage /></ProtectedRoute> },
       { path: 'post-details/:id', element: <ProtectedRoute><PostDetails /></ProtectedRoute> },
       { path: 'profile', element: <ProtectedRoute><Profile /></ProtectedRoute> },
+      { path: 'change-password', element: <ProtectedRoute><UpdatePassword /></ProtectedRoute> },
       { path: '*', element: <NotFound /> }
     ]
   },
@@ -28,6 +30,7 @@ const routers = createBrowserRouter([
     ]
   }
 ])
+
 function App() {
   return (
     <>

@@ -1,22 +1,22 @@
-import React, { useEffect, useState, useContext } from 'react'
-import { getUserDataApi } from '../Services/AuthServices'
-import LoadingScreen from '../Components/LoadingScreen'
-import UserPosts from '../Components/UserPosts'
-import { uploadUserPhotoApi } from '../Services/UserServices'
+import React, { useEffect, useState, useContext } from 'react';
+import { getUserDataApi } from '../Services/AuthServices';
+import LoadingScreen from '../Components/LoadingScreen';
+import UserPosts from '../Components/UserPosts';
+import { uploadUserPhotoApi } from '../Services/UserServices';
+import { Link } from 'react-router-dom'; // مهم جداً للـ Link
 
 export default function Profile() {
-  const [userData, setUserData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isUploading, setIsUploading] = useState(false)
-  const [uploadError, setUploadError] = useState("")
-
+  const [userData, setUserData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   async function handleUploadPhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
 
     const previewUrl = URL.createObjectURL(file);
-    const oldPhoto = userData.photo; 
+    const oldPhoto = userData.photo;
 
     setUserData(prev => ({ ...prev, photo: previewUrl }));
     setIsUploading(true);
@@ -26,10 +26,7 @@ export default function Profile() {
       const response = await uploadUserPhotoApi(file);
 
       if (response?.message === "success" && response.user) {
-        const finalPhoto = response.user.photo;
-
-        setUserData(prev => ({ ...prev, photo: finalPhoto }));
-
+        setUserData(prev => ({ ...prev, photo: response.user.photo }));
       } else {
         throw new Error("Upload failed");
       }
@@ -93,9 +90,17 @@ export default function Profile() {
             <h1 className='text-2xl md:text-3xl font-bold text-gray-800'>{userData.name}</h1>
             <p className='text-gray-500'>{userData.email}</p>
 
-            <div className="mt-3 flex flex-wrap justify-center md:justify-start gap-2">
+            {/* Badges + Change Password Link */}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge text={userData.gender} color="blue" />
               <Badge text={userData.dateOfBirth} color="gray" />
+
+              <Link
+                to="/change-password"
+                className="px-3 py-1 bg-blue-600 text-white text-xs md:text-sm rounded hover:bg-blue-700 transition-colors"
+              >
+                Change Password
+              </Link>
             </div>
 
             {uploadError && <p className="mt-2 text-red-500 text-sm animate-pulse">{uploadError}</p>}
@@ -108,7 +113,6 @@ export default function Profile() {
   )
 }
 
-// مكون فرعي صغير لزيادة نظافة الكود (Clean Code)
 function Badge({ text, color }) {
   const styles = {
     blue: "bg-blue-50 text-blue-600 border-blue-100",
