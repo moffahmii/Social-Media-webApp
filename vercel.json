@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "https://linked-posts.routemisr.com/$1"
+        }
+    ]
+}

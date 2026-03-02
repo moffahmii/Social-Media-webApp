@@ -1,33 +1,42 @@
 import React, { useContext, useEffect, useState } from 'react'
 import PostCard from '../Components/PostCard'
-import { getAllPosts } from '../Services/PostServices'
+import { getAllPostsApi } from '../Services/PostServices'
 import LoadingScreen from '../Components/LoadingScreen'
 import CreatePost from '../Components/CreatePost'
+import { useQuery } from '@tanstack/react-query'
 
 export default function FeedPage() {
-  const [posts, setPosts] = useState([])
-
-  async function getAllPosTs() {
-    const response = await getAllPosts()
-    setPosts(response.posts)
+  const {
+    data: posts = [],
+    isLoading,
+    isError,
+    error,
+    refetch:getPosts
+  } = useQuery({
+    queryKey: ['posts'],
+    queryFn: getAllPostsApi,
+    select: (res) => res.data.posts
+  });
+  if (isLoading) return <LoadingScreen />;
+  if (isError) {
+    return <p>{error?.response?.data?.message}</p>;
   }
-  useEffect(() => {
-    getAllPosTs()
-  }, [])
 
-  return <>
-    <div className='w-4/6 mx-auto'>
-      <CreatePost callback={getAllPosTs} />
-      {posts.length === 0 ? (
-        <LoadingScreen />
-      ) : (
-        posts.map((post) => (
-          <PostCard commentLimit={1} post={post} key={post.id} />
-        ))
-      )}
+  return (
+    <div className="w-4/6 mx-auto">
+      <CreatePost callback={getPosts} />
+      {posts.map((post) => (
+        <PostCard
+          key={post._id}
+          post={post}
+          commentLimit={5}
+          callback={getPosts}
+        />
+      ))}
     </div>
-  </>
-
-
-
+  );
 }
+
+
+
+

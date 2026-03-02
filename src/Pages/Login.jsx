@@ -14,14 +14,11 @@ export default function Login() {
     const [isVisible, setIsVisible] = useState(false);
     const { setIsLoggedIn } = useContext(AuthContext);
     const navigate = useNavigate();
-
     const toggleVisibility = () => setIsVisible(!isVisible);
-
     const { handleSubmit, register, formState: { errors, touchedFields } } = useForm({
         resolver: zodResolver(schema),
         mode: 'onTouched'
     });
-
     async function sendData(userData) {
         setloading(true);
         setapiError(null);
@@ -35,12 +32,9 @@ export default function Login() {
             setapiError(res?.error || res?.message || "Invalid email or password");
         }
     }
-
     return <>
         <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-slate-50 to-blue-100 p-4">
-
             <Card className="max-w-md w-full shadow-xl bg-white/90 backdrop-blur-md border-none rounded-2xl">
-
                 <CardHeader className="flex flex-col gap-1 items-center py-6">
                     <div className="bg-primary/10 p-3 rounded-full mb-2">
                         <LogIn className="text-primary" size={28} />
@@ -48,9 +42,7 @@ export default function Login() {
                     <h1 className="text-2xl font-bold text-slate-800">Welcome Back</h1>
                     <p className="text-small text-default-500">Log in to your account to continue</p>
                 </CardHeader>
-
                 <Divider />
-
                 <CardBody className="py-6 px-8">
                     <form onSubmit={handleSubmit(sendData)} className="flex flex-col gap-5">
                         <Input
@@ -64,7 +56,6 @@ export default function Login() {
                             autoComplete="email"
                             variant="bordered"
                         />
-
                         <Input
                             label="Password"
                             placeholder="Enter your password"
@@ -85,13 +76,11 @@ export default function Login() {
                             isInvalid={!!errors.password && touchedFields.password}
                             errorMessage={errors.password?.message}
                         />
-
                         {apiError && (
                             <div className="bg-red-50 border border-red-100 p-2 rounded-lg">
                                 <p className="text-center text-red-500 text-xs font-bold">{apiError}</p>
                             </div>
                         )}
-
                         <Button
                             isLoading={loading}
                             color="primary"
@@ -100,7 +89,6 @@ export default function Login() {
                         >
                             Log In
                         </Button>
-
                         <div className="text-center text-small mt-1">
                             Don't have an account?{" "}
                             <Link to="/register" className="text-primary font-bold hover:underline">
